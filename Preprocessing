@@ -1,0 +1,56 @@
+import numpy as np
+import pandas as pd
+import plotly.express as px
+
+import matplotlib.pyplot as plt
+import seaborn as sns
+import re
+import warnings
+
+warnings.filterwarnings("ignore")
+warnings.warn("this will not show")
+pd.set_option('display.float_format', lambda x: '%.3f' % x)
+
+
+!mkdir -p ~/.kaggle
+!cp kaggle.json ~/.kaggle/
+!chmod 600 ~/.kaggle/kaggle.json
+
+
+!kaggle datasets download -d basilb2s/language-detection
+
+!unzip -o language-detection.zip
+
+
+train = pd.read_csv('Language Detection.csv')
+
+
+print(train.head())
+
+train["Language"].value_counts()
+train.isnull().sum()
+ax = train["Language"].value_counts().plot(kind="bar")
+plt.show()
+
+X = train["Text"]
+y = train["Language"]
+
+from sklearn.preprocessing import LabelEncoder
+
+le = LabelEncoder()
+y = le.fit_transform(y)
+
+data_list = []
+
+for text in X:
+    text = re.sub(r'[!@#$(),n"%^*? :;~`0-9]', ' ', text)
+    text = re.sub(r'[[]]', ' ', text)
+    text = text.lower()
+    data_list.append(text)
+
+X.isnull().sum()
+
+from sklearn.feature_extraction.text import CountVectorizer
+
+cv = CountVectorizer()
+X = cv.fit_transform(data_list).toarray()
